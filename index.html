@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEYİK BORSASI v1.0</title>
+    <!-- Atarici Fontu -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    
+    <!-- FIREBASE BAĞLANTI KÜTÜPHANELERİ -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <style>
+        /* GENEL TASARIM VE PIXEL-ART AYARLARI */
+        * {
+            box-sizing: border-box;
+            font-family: 'Press Start 2P', monospace;
+            image-rendering: pixelated;
+        }
+
+        body {
+            background-color: #12121c; 
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background-color 0.1s ease;
+        }
+
+        body.flash-white {
+            background-color: #ffffff !important;
+        }
+
+        h1 {
+            color: #00ffcc; 
+            text-shadow: 4px 4px 0px #ff0055; 
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 12px;
+            color: #00ffcc;
+            margin-top: 20px;
+            border-bottom: 2px dashed #ff0055;
+            padding-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        /* PIXEL BUTON VE KUTULAR */
+        .pixel-box {
+            background-color: #1e1e2f;
+            border: 4px solid #ffffff;
+            box-shadow: 6px 6px 0px #ff0055;
+            padding: 20px;
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .pixel-btn {
+            background-color: #ff0055;
+            color: white;
+            border: 4px solid #ffffff;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 10px;
+            box-shadow: 4px 4px 0px #000;
+            margin: 5px;
+        }
+
+        .pixel-btn:hover {
+            background-color: #00ffcc;
+            color: #000;
+            box-shadow: 2px 2px 0px #000;
+        }
+
+        .pixel-btn.selected {
+            background-color: #ffb800 !important;
+            color: #000 !important;
+            border-color: #fff;
+        }
+
+        .pixel-btn:disabled {
+            background-color: #444 !important;
+            color: #888 !important;
+            border-color: #666 !important;
+            cursor: not-allowed;
+            box-shadow: none !important;
+        }
+
+        input, select {
+            background-color: #000;
+            color: #00ffcc;
+            border: 4px solid #ffffff;
+            padding: 10px;
+            font-size: 11px;
+            width: 100%;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        /* KARAKTER SEÇİM ALANI */
+        .character-select-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .char-card {
+            background-color: #000;
+            border: 4px solid #fff;
+            padding: 20px;
+            cursor: pointer;
+            text-align: center;
+            width: 160px;
+            box-shadow: 5px 5px 0px #ff0055;
+        }
+
+        .char-card:hover {
+            border-color: #00ffcc;
+            box-shadow: 5px 5px 0px #00ffcc;
+            transform: scale(1.05);
+        }
+
+        .char-avatar { font-size: 40px; margin-bottom: 15px; }
+
+        /* GİRİŞ EKRANI */
+        #login-screen { text-align: center; margin-top: 30px; }
+
+        /* ANA OYUN ALANI */
+        #main-game { display: none; width: 100%; max-width: 1100px; }
+
+        .game-layout { display: flex; flex-wrap: wrap; gap: 20px; width: 100%; }
+        .left-side { flex: 2; min-width: 300px; }
+        .right-side { flex: 1; min-width: 250px; }
+
+        /* GÜNLÜK ÇARK ALANI */
+        .wheel-box {
+            background: #12121a;
+            border: 4px dashed #ffb800;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #wheel-display {
+            font-size: 14px;
+            color: #ffb800;
+            margin: 15px 0;
+            height: 30px;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        /* İSTATİSTİK BARLARI */
+        .stat-bar-container {
+            background-color: #000;
+            border: 2px solid #fff;
+            height: 15px;
+            margin-top: 10px;
+            position: relative;
+            display: flex;
+        }
+        .stat-bar-evet { background-color: #00ffcc; height: 100%; transition: width 0.3s; }
+        .stat-bar-hayir { background-color: #ff0055; height: 100%; transition: width 0.3s; }
+        .stat-text {
+            position: absolute; width: 100%; text-align: center;
+            font-size: 8px; color: #fff; line-height: 15px; font-weight: bold;
+            text-shadow: 1px 1px 0px #000;
+        }
+
+        /* BAHİS KARTLARI VE CHALLENGE KARTLARI */
+        .bet-card, .challenge-card {
+            background: #252538;
+            border: 4px solid #00ffcc;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 4px 4px 0px #ff0055;
+        }
+
+        .challenge-card {
+            border-color: #ffb800;
+            box-shadow: 4px 4px 0px #ffb800;
+        }
+
+        .bet-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9px;
+            margin-bottom: 10px;
+            color: #ffb800;
+        }
+
+        .bet-title { font-size: 11px; margin-bottom: 15px; line-height: 1.6; }
+        .admin-actions { margin-top: 15px; padding-top: 10px; border-top: 2px dashed #ff0055; background-color: #12121a; padding: 10px; }
+
+        /* SKOR TABLOLARI */
+        .leaderboard-item {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            border-bottom: 2px dashed #444;
+        }
+        .leader-row { display: flex; justify-content: space-between; font-size: 11px; align-items: center; }
+        .rank-badge { font-size: 7px; color: #888; margin-top: 4px; text-transform: uppercase; }
+
+        .crown { color: #ffb800; }
+
+        /* GEÇMİŞ BAHİSLER ARŞİVİ */
+        .archive-box { width: 100%; margin-top: 40px; padding-top: 20px; border-top: 4px double #444; }
+        .history-item {
+            background-color: #161622; border: 2px dashed #666; padding: 10px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center; font-size: 10px;
+        }
+        .result-badge { padding: 4px 8px; border: 2px solid #fff; font-size: 9px; font-weight: bold; }
+        .result-evet { background-color: #00ffcc; color: #000; border-color: #00ffcc; }
+        .result-hayir { background-color: #ff0055; color: #fff; border-color: #ff0055; }
+    </style>
+</head>
+<body>
+
+    <h1>=== GEYİK BORSASI ===</h1>
+
+    <!-- 1. ADIM: KARAKTER SEÇİM GİRİŞ EKRANI -->
+    <div id="login-screen" class="pixel-box">
+        <p style="color: #ffb800; font-size: 12px; margin-bottom: 20px; letter-spacing: 2px;">SELECT YOUR OYUNCU</p>
+        <div class="character-select-container">
+            <div class="char-card" onclick="selectProfile('Furkan')">
+                <div class="char-avatar">🕷️</div>
+                <div style="font-size: 12px; color: #00ffcc;">FURKAN</div>
+            </div>
+            <div class="char-card" onclick="selectProfile('Kaan')">
+                <div class="char-avatar">🐥</div>
+                <div style="font-size: 12px; color: #ff0055;">KAAN</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. ADIM: ANA OYUN ALANI -->
+    <div id="main-game">
+        <!-- Oyuncu Bilgisi -->
+        <div style="text-align: center; margin-bottom: 20px; font-size: 11px;">
+            OYUNCU: <span id="current-user-avatar">-</span> <span id="current-user-display" style="color:#00ffcc;">-</span> | 
+            CÜZDAN: <span id="current-score-display" style="color:#ffb800;">0</span> GC
+        </div>
+
+        <!-- ANLIK MEYDAN OKUMA BİLDİRİM ALANI -->
+        <div id="challenge-alert-box" class="pixel-box" style="border-color: #ffb800; background: #2a1111; display: none;">
+            <p style="color: #ffb800; font-size: 11px; text-align: center;">🚨 SANA MEYDAN OKUNDU! 🚨</p>
+            <div id="challenge-alert-text" style="font-size: 10px; margin: 15px 0; line-height: 1.6; text-align: center;"></div>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 10px;">
+                    <button class="pixel-btn" style="background:#00ffcc; color:#000; flex:1;" onclick="acceptChallenge()">👍 KABUL ET</button>
+                    <button class="pixel-btn" style="background:#ff0055; color:#fff; flex:1;" onclick="rejectChallenge()">👎 REDDET</button>
+                </div>
+                <button class="pixel-btn" style="background:#ffb800; color:#000; margin: 5px 0;" onclick="doubleChallenge()">🔥 RİSKİ KATLA (2X)</button>
+            </div>
+        </div>
+
+        <div class="game-layout">
+            <!-- SOL TARAF MODÜLLER -->
+            <div class="left-side">
+                <!-- ŞANS ÇARKI MODÜLÜ -->
+                <div class="wheel-box">
+                    <p style="font-size: 9px; color:#ffb800; margin:0;">🎰 GÜNLÜK ŞANS ÇARKI</p>
+                    <div id="wheel-display">== HAZIR ==</div>
+                    <button id="wheel-btn" class="pixel-btn" style="background:#ffb800; color:#000; margin:0;" onclick="spinWheel()">🔥 ÇARKI ÇEVİR</button>
+                </div>
+
+                <!-- MEYDAN OKUMA BAŞLATMA -->
+                <div class="pixel-box" style="border-color: #ffb800;">
+                    <p style="color: #ffb800; font-size: 10px; margin-bottom: 15px;">⚔️ MEYDAN OKUMA BAŞLAT</p>
+                    <select id="challenge-target">
+                        <option value="">KİME MEYDAN OKUYORSUN?</option>
+                    </select>
+                    <input type="text" id="challenge-text" placeholder="Meydan okuma iddiası ne?">
+                    <input type="number" id="challenge-amount" placeholder="Kaç GC ortaya koyuyorsun?">
+                    <button class="pixel-btn" style="background-color: #ffb800; color:#000; width: 100%; margin: 0;" onclick="startChallenge()">KILICI ÇEK / MEYDAN OKU</button>
+                </div>
+
+                <!-- Admin Paneli -->
+                <div class="pixel-box" style="border-color: #ff0055;">
+                    <p style="color: #ff0055; font-size: 10px; margin-bottom: 15px;">🛠️ ADMİN PANELİ (BAHİS YAZMA ALANI)</p>
+                    <input type="text" id="bet-text" placeholder="İddia nedir?">
+                    <select id="bet-difficulty">
+                        <option value="50">KOLAY (50 GC)</option>
+                        <option value="100">ORTA (100 GC)</option>
+                        <option value="200">ZOR (200 GC)</option>
+                        <option value="500">DESTANSI (500 GC)</option>
+                    </select>
+                    <button class="pixel-btn" style="background-color: #00ffcc; color:#000; width: 100%; margin-bottom: 20px;" onclick="createBet()">BAHSİ ORTAYA AT</button>
+                    
+                    <!-- 🧹 YENİ: SIFIRLAMA BUTONU -->
+                    <p style="color: #ff0055; font-size: 8px; margin: 15px 0 5px 0; border-top: 2px dashed #ff0055; padding-top: 15px;">⚠️ TEHLİKELİ BÖLGE:</p>
+                    <button class="pixel-btn" style="background-color: #000; color: #ff0055; border-color: #ff0055; width: 100%; margin: 0;" onclick="resetAllData()">🧹 TÜM VERİLERİ SIFIRLA</button>
+                </div>
+
+                <h2>AKTİF GENEL BAHİSLER</h2>
+                <div id="bets-container"></div>
+
+                <h2>⚔️ AKTİF MEYDAN OKUMALAR (KAPIŞMALAR)</h2>
+                <div id="challenges-container"></div>
+            </div>
+
+            <!-- SAĞ TARAF SKORLAR -->
+            <div class="right-side">
+                <div class="pixel-box" style="border-color: #ffb800; margin-bottom: 20px;">
+                    <p style="color: #ffb800; font-size: 10px; text-align: center; margin-bottom: 15px;">🏆 HIGH SCORES</p>
+                    <div id="leaderboard-container"></div>
+                </div>
+
+                <div class="pixel-box" style="border-color: #00ffcc;">
+                    <p style="color: #00ffcc; font-size: 10px; text-align: center; margin-bottom: 15px;">📊 KAPIŞMA GALİBİYETLERİ</p>
+                    <div style="font-size: 10px; padding: 5px 0; border-bottom: 1px dashed #333; display: flex; justify-content: space-between;">
+                        <span>🕷️ FURKAN:</span> <span id="stat-wins-furkan" style="color: #00ffcc;">0</span>
+                    </div>
+                    <div style="font-size: 10px; padding: 5px 0; display: flex; justify-content: space-between;">
+                        <span>🐥 KAAN:</span> <span id="stat-wins-kaan" style="color: #ff0055;">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="archive-box">
+            <h2>📜 GEÇMİŞ BAHİSLER & KAPIŞMALAR (ARŞİV)</h2>
+            <div id="history-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // 🚨 BURAYA SADECE KOPYALADIĞIN FIREBASE URL LINKINI YAPIŞTIR 🚨
+        const FIREBASE_URL = "https://geyik-b1609-default-rtdb.firebaseio.com/"; 
+        // ==========================================
+
+        // Firebase'i Başlat
+        firebase.initializeApp({ databaseURL: FIREBASE_URL });
+        const db = firebase.database();
+
+        // --- 8-BIT SES SENTEZLEYİCİ ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+            } 
+            else if (type === 'coin') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+            } 
+            else if (type === 'levelup') {
+                osc.type = 'square'; let now = audioCtx.currentTime;
+                osc.frequency.setValueAtTime(330, now); osc.frequency.setValueAtTime(392, now + 0.06);
+                osc.frequency.setValueAtTime(659, now + 0.12); osc.frequency.setValueAtTime(784, now + 0.18);
+                gain.gain.setValueAtTime(0.12, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+                osc.start(); osc.stop(now + 0.35);
+            }
+            else if (type === 'clash') {
+                osc.type = 'sawtooth'; let now = audioCtx.currentTime;
+                osc.frequency.setValueAtTime(880, now); osc.frequency.exponentialRampToValueAtTime(1500, now + 0.08);
+                osc.frequency.exponentialRampToValueAtTime(200, now + 0.2); gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25); osc.start(); osc.stop(now + 0.25);
+            }
+            else if (type === 'cry') {
+                osc.type = 'triangle'; let now = audioCtx.currentTime;
+                osc.frequency.setValueAtTime(300, now); osc.frequency.linearRampToValueAtTime(120, now + 0.4); 
+                gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+                osc.start(); osc.stop(now + 0.45);
+            }
+        }
+
+        // --- DEĞİŞKENLER ---
+        let currentUser = "";
+        let selectedAvatarSymbol = ""; 
+        let players = {};
+        let activeIncomingChallengeId = null;
+
+        function getRank(score) {
+            if (score <= 200) return "🟢 ÇAYLAK";
+            if (score <= 500) return "🟡 KUMARBAZ";
+            if (score <= 1500) return "🔴 BALİNA";
+            return "🔥 BORSACI ASLAN";
+        }
+
+        function selectProfile(name) {
+            playSound('click');
+            currentUser = name;
+            
+            if (!players[currentUser]) {
+                db.ref("players/" + currentUser).set({
+                    score: 100,
+                    avatar: currentUser === "Furkan" ? "🕷️" : "🐥",
+                    challengeWins: 0,
+                    lastWheelDate: ""
+                });
+            }
+
+            selectedAvatarSymbol = currentUser === "Furkan" ? "🕷️" : "🐥";
+            document.getElementById("login-screen").style.display = "none";
+            document.getElementById("main-game").style.display = "block";
+            
+            document.getElementById("current-user-avatar").innerText = selectedAvatarSymbol;
+            document.getElementById("current-user-display").innerText = currentUser;
+
+            startLiveSync();
+        }
+
+        function startLiveSync() {
+            db.ref("players").on("value", snapshot => {
+                players = snapshot.val() || {};
+                if(players[currentUser]) {
+                    document.getElementById("current-score-display").innerText = players[currentUser].score;
+                }
+                updateUI();
+            });
+
+            db.ref("activeBets").on("value", () => { updateUI(); });
+
+            db.ref("activeChallenges").on("value", snapshot => {
+                let chs = snapshot.val() || {};
+                let incoming = Object.keys(chs).find(key => chs[key].target === currentUser && chs[key].status === "pending");
+                
+                if (incoming && activeIncomingChallengeId !== incoming) {
+                    activeIncomingChallengeId = incoming;
+                    let c = chs[incoming];
+                    document.getElementById("challenge-alert-text").innerHTML = `<b>${c.challenger}</b> sana <b>${c.amount} GC</b> değerinde meydan okudu!<br>İddia: <i>"${c.title}"</i>`;
+                    document.getElementById("challenge-alert-box").style.display = "block";
+                    playSound('coin');
+                } else if (!incoming) {
+                    document.getElementById("challenge-alert-box").style.display = "none";
+                    activeIncomingChallengeId = null;
+                }
+                updateUI();
+            });
+
+            db.ref("pastBets").on("value", () => { updateUI(); });
+        }
+
+        // --- GÜNLÜK ŞANS ÇARKI ---
+        function spinWheel() {
+            playSound('click');
+            let today = new Date().toISOString().slice(0, 10);
+            
+            if (players[currentUser].lastWheelDate === today) {
+                alert("Bugün zaten çarkı çevirdin kanka! Yarın gel.");
+                return;
+            }
+
+            let btn = document.getElementById("wheel-btn");
+            let display = document.getElementById("wheel-display");
+            btn.disabled = true; display.classList.add("spinning");
+
+            let counter = 0;
+            let visualPossibilities = ["+10 GC", "+20 GC", "+25 GC", "+30 GC", "-20 GC", "+50 GC", "+100 GC"];
+            
+            let interval = setInterval(() => {
+                display.innerText = visualPossibilities[Math.floor(Math.random() * visualPossibilities.length)];
+                playSound('click'); counter++;
+                
+                if (counter > 15) {
+                    clearInterval(interval);
+                    display.classList.remove("spinning");
+                    
+                    let finalRoll = Math.random() * 100;
+                    let prizeText = ""; let prizeValue = 0;
+
+                    if (finalRoll < 25) { prizeText = "🟢 +10 GC"; prizeValue = 10; }
+                    else if (finalRoll < 47) { prizeText = "🟢 +20 GC"; prizeValue = 20; }
+                    else if (finalRoll < 65) { prizeText = "🟡 +25 GC"; prizeValue = 25; }
+                    else if (finalRoll < 80) { prizeText = "🔵 +30 GC"; prizeValue = 30; }
+                    else if (finalRoll < 92) { prizeText = "🟠 -20 GC"; prizeValue = -20; }
+                    else if (finalRoll < 98) { prizeText = "🔴 +50 GC"; prizeValue = 50; }
+                    else { prizeText = "🔥 +100 GC!"; prizeValue = 100; }
+
+                    display.innerText = prizeText;
+                    let newScore = (players[currentUser].score || 0) + prizeValue;
+                    if(newScore < 0) newScore = 0;
+
+                    db.ref("players/" + currentUser).update({
+                        score: newScore,
+                        lastWheelDate: today
+                    });
+                    playSound('levelup');
+                }
+            }, 100);
+        }
+
+        // --- MEYDAN OKUMA BAŞLATMA ---
+        function startChallenge() {
+            playSound('click');
+            let target = document.getElementById("challenge-target").value;
+            let text = document.getElementById("challenge-text").value.trim();
+            let amount = parseInt(document.getElementById("challenge-amount").value);
+
+            if(!target) return alert("Kime meydan okuyacağını seç kanka!");
+            if(text === "") return alert("İddiayı boş bırakamazsın!");
+            if(isNaN(amount) || amount <= 0) return alert("Düzgün bir puan gir!");
+            if(players[currentUser].score < amount) return alert("Cüzdanında o kadar coin yok!");
+
+            let ref = db.ref("activeChallenges").push();
+            ref.set({
+                id: ref.key,
+                challenger: currentUser,
+                target: target,
+                title: text,
+                amount: amount,
+                status: "pending"
+            });
+
+            db.ref("players/" + currentUser).update({ score: players[currentUser].score - amount });
+            document.getElementById("challenge-text").value = "";
+            document.getElementById("challenge-amount").value = "";
+            alert("Meydan okuma gönderildi!");
+        }
+
+        function acceptChallenge() {
+            if(!activeIncomingChallengeId) return;
+            playSound('clash');
+            document.body.classList.add('flash-white');
+            setTimeout(() => { document.body.classList.remove('flash-white'); }, 150);
+
+            db.ref("activeChallenges/" + activeIncomingChallengeId).once("value", snapshot => {
+                let c = snapshot.val();
+                if(players[currentUser].score < c.amount) {
+                    alert("Kabul edecek yeterli GC cüzdanında yok!");
+                    rejectChallenge();
+                    return;
+                }
+                db.ref("players/" + currentUser).update({ score: players[currentUser].score - c.amount });
+                db.ref("activeChallenges/" + activeIncomingChallengeId).update({ status: "accepted" });
+            });
+        }
+
+        function doubleChallenge() {
+            if(!activeIncomingChallengeId) return;
+            playSound('clash');
+
+            db.ref("activeChallenges/" + activeIncomingChallengeId).once("value", snapshot => {
+                let c = snapshot.val();
+                if(players[currentUser].score < c.amount || players[c.challenger].score < c.amount) {
+                    alert("Riski katlamak için taraflardan birinin cüzdanı yetersiz!");
+                    return;
+                }
+                db.ref("players/" + currentUser).update({ score: players[currentUser].score - c.amount });
+                db.ref("players/" + c.challenger).update({ score: players[c.challenger].score - c.amount });
+                
+                db.ref("activeChallenges/" + activeIncomingChallengeId).update({ 
+                    amount: c.amount * 2,
+                    status: "accepted",
+                    title: "🔥 [MİSLİ] " + c.title
+                });
+
+                document.body.classList.add('flash-white');
+                setTimeout(() => { document.body.classList.remove('flash-white'); }, 150);
+            });
+        }
+
+        function rejectChallenge() {
+            if(!activeIncomingChallengeId) return;
+            playSound('cry');
+            db.ref("activeChallenges/" + activeIncomingChallengeId).once("value", snapshot => {
+                let c = snapshot.val();
+                db.ref("players/" + c.challenger).update({ score: (players[c.challenger].score || 0) + c.amount });
+                db.ref("activeChallenges/" + activeIncomingChallengeId).remove();
+            });
+        }
+
+        function resolveChallenge(id, winner) {
+            playSound('levelup');
+            db.ref("activeChallenges/" + id).once("value", snapshot => {
+                let c = snapshot.val();
+                db.ref("players/" + winner).update({ 
+                    score: players[winner].score + (c.amount * 2),
+                    challengeWins: (players[winner].challengeWins || 0) + 1
+                });
+
+                db.ref("pastBets").push({
+                    title: `⚔️ [KAPIŞMA] ${c.challenger} vs ${c.target} -> ${c.title}`,
+                    result: `KAZANAN: ${winner}`
+                });
+                db.ref("activeChallenges/" + id).remove();
+            });
+        }
+
+        // --- GENEL BAHİS KODLARI ---
+        function createBet() {
+            playSound('coin');
+            let text = document.getElementById("bet-text").value.trim();
+            let points = parseInt(document.getElementById("bet-difficulty").value);
+            if(text === "") return alert("Bahis metni gir kanka!");
+
+            let ref = db.ref("activeBets").push();
+            ref.set({ id: ref.key, title: text, points: points });
+            document.getElementById("bet-text").value = "";
+        }
+
+        function makeGuess(betId, option) {
+            playSound('click');
+            db.ref("activeBets/" + betId + "/guesses/" + currentUser).set(option);
+        }
+
+        function resolveBet(betId, winningOption) {
+            playSound('levelup');
+            db.ref("activeBets/" + betId).once("value", snapshot => {
+                let bet = snapshot.val();
+                let guesses = bet.guesses || {};
+                
+                Object.keys(guesses).forEach(user => {
+                    if(guesses[user] === winningOption) {
+                        db.ref("players/" + user + "/score").set(players[user].score + bet.points);
+                    }
+                });
+
+                db.ref("pastBets").push({ title: bet.title, result: winningOption });
+                db.ref("activeBets/" + betId).remove();
+            });
+        }
+
+        // 🧹 YENİ: EMİN MİSİN UYARILI TÜM VERİLERİ SIFIRLAMA FONKSİYONU
+        function resetAllData() {
+            playSound('cry');
+            let confirm1 = confirm("⚠️ EMİN MİSİN KANKA?\n\nBütün puanlar, aktif iddialar, galibiyet sayıları ve geçmiş arşiv tamamen sıfırlanacak!");
+            
+            if (confirm1) {
+                let confirm2 = confirm("🚨 SON UYARI!\n\nBak geri dönüşü yok, Kaan'la aranızdaki tüm ezeli rekabet kayıtları buluttan silinecek. Gerçekten sıfırlayalım mı?");
+                if (confirm2) {
+                    // Firebase Realtime Database'deki tüm ana düğümü temizle
+                    db.ref("/").remove().then(() => {
+                        alert("🧹 İşlem Başarılı! Buluttaki tüm test verileri süpürüldü. Sayfa yenileniyor...");
+                        window.location.reload();
+                    }).catch(error => {
+                        alert("Hata oluştu: " + error.message);
+                    });
+                }
+            }
+        }
+
+        // --- ARAYÜZ YENİLEME VE ÇİZİM ---
+        function updateUI() {
+            db.ref("activeBets").once("value", snapshot => {
+                let bets = snapshot.val() || {};
+                let betsHTML = "";
+                let keys = Object.keys(bets);
+                
+                if(keys.length === 0) betsHTML = "<p style='font-size:10px; color:#666; text-align:center;'>Aktif genel bahis bulunmuyor...</p>";
+                
+                keys.forEach(key => {
+                    let bet = bets[key];
+                    let guesses = bet.guesses || {};
+                    let currentGuess = guesses[currentUser] || null;
+                    let evetClass = currentGuess === "Evet" ? "pixel-btn selected" : "pixel-btn";
+                    let hayirClass = currentGuess === "Hayır" ? "pixel-btn selected" : "pixel-btn";
+
+                    let total = Object.keys(guesses).length;
+                    let evetC = Object.values(guesses).filter(v => v === "Evet").length;
+                    let hayirC = Object.values(guesses).filter(v => v === "Hayır").length;
+                    let evetP = total === 0 ? 50 : Math.round((evetC / total) * 100);
+                    let hayirP = total === 0 ? 50 : Math.round((hayirC / total) * 100);
+
+                    betsHTML += `
+                        <div class="bet-card">
+                            <div class="bet-header"><span>ÖDÜL: ${bet.points} GC</span><span style="color:#ff0055;">LIVE 🔴</span></div>
+                            <div class="bet-title">${bet.title}</div>
+                            <div style="display:flex; gap:10px;">
+                                <button class="${evetClass}" style="flex:1;" onclick="makeGuess('${bet.id}', 'Evet')">[ EVET ]</button>
+                                <button class="${hayirClass}" style="flex:1;" onclick="makeGuess('${bet.id}', 'Hayır')">[ HAYIR ]</button>
+                            </div>
+                            <div class="stat-bar-container">
+                                <div class="stat-bar-evet" style="width: ${evetP}%"></div>
+                                <div class="stat-bar-hayir" style="width: ${hayirP}%"></div>
+                                <div class="stat-text">EVET %${evetP} | %${hayirP} HAYIR</div>
+                            </div>
+                            <div class="admin-actions">
+                                <button class="pixel-btn" style="background:#00ffcc; color:#000;" onclick="resolveBet('${bet.id}', 'Evet')">EVET KAZANDI</button>
+                                <button class="pixel-btn" style="background:#ff0055; color:#fff;" onclick="resolveBet('${bet.id}', 'Hayır')">HAYIR KAZANDI</button>
+                            </div>
+                        </div>`;
+                });
+                document.getElementById("bets-container").innerHTML = betsHTML;
+            });
+
+            db.ref("activeChallenges").once("value", snapshot => {
+                let chs = snapshot.val() || {};
+                let challHTML = "";
+                let keys = Object.keys(chs);
+                
+                let acc = keys.filter(k => chs[k].status === "accepted");
+                let pend = keys.filter(k => chs[k].status === "pending");
+
+                if(acc.length === 0 && pend.length === 0) challHTML = "<p style='font-size:10px; color:#666; text-align:center;'>Aktif kapışma yok. Kılıçlar kınında!</p>";
+
+                acc.forEach(key => {
+                    let c = chs[key];
+                    challHTML += `
+                        <div class="challenge-card">
+                            <div class="bet-header"><span style="color:#ffb800;">⚔️ KAPIŞMA HAVUZU: ${c.amount * 2} GC</span><span style="color:#00ffcc;">ONAYLANDI 👍</span></div>
+                            <div class="bet-title"><b>${c.challenger}</b> vs <b>${c.target}</b><br>İddia: <i>"${c.title}"</i></div>
+                            <div class="admin-actions" style="border-color: #ffb800;">
+                                <button class="pixel-btn" style="background:#ffb800; color:#000;" onclick="resolveChallenge('${c.id}', '${c.challenger}')">${c.challenger} KAZANDI</button>
+                                <button class="pixel-btn" style="background:#ffb800; color:#000;" onclick="resolveChallenge('${c.id}', '${c.target}')">${c.target} KAZANDI</button>
+                            </div>
+                        </div>`;
+                });
+
+                pend.forEach(key => {
+                    let c = chs[key];
+                    challHTML += `
+                        <div class="challenge-card" style="border-color: #666; opacity: 0.7;">
+                            <div class="bet-header"><span style="color:#aaa;">İSTEK: ${c.amount} GC</span><span style="color:#ffb800;">ONAY BEKLİYOR ⏳</span></div>
+                            <div class="bet-title"><b>${c.challenger}</b> -> <b>${c.target}</b> kişisine kılıç çekti.<br>İddia: <i>"${c.title}"</i></div>
+                        </div>`;
+                });
+                document.getElementById("challenges-container").innerHTML = challHTML;
+            });
+
+            let sorted = Object.keys(players).map(name => {
+                return { name: name, score: players[name].score || 0, avatar: players[name].avatar || "" };
+            }).sort((a,b) => b.score - a.score);
+
+            let lbHTML = "";
+            let targetHTML = "<option value=''>KİME MEYDAN OKUYORSUN?</option>";
+
+            sorted.forEach((p, idx) => {
+                let crown = idx === 0 ? "<span class='crown'>👑</span> " : `${idx + 1}. `;
+                lbHTML += `
+                    <div class="leaderboard-item">
+                        <div class="leader-row"><span>${crown}${p.avatar} ${p.name}</span><span style="color:#ffb800;">${p.score} GC</span></div>
+                        <div class="rank-badge">${getRank(p.score)}</div>
+                    </div>`;
+                if(p.name !== currentUser) targetHTML += `<option value="${p.name}">${p.name}</option>`;
+            });
+            document.getElementById("leaderboard-container").innerHTML = lbHTML;
+            document.getElementById("challenge-target").innerHTML = targetHTML;
+
+            document.getElementById("stat-wins-furkan").innerText = players["Furkan"] ? (players["Furkan"].challengeWins || 0) : 0;
+            document.getElementById("stat-wins-kaan").innerText = players["Kaan"] ? (players["Kaan"].challengeWins || 0) : 0;
+
+            db.ref("pastBets").limitToLast(10).once("value", snapshot => {
+                let past = snapshot.val() || {};
+                let historyHTML = "";
+                let pKeys = Object.keys(past).reverse();
+
+                if(pKeys.length === 0) historyHTML = "<p style='font-size:9px; color:#444; text-align:center;'>Sonuçlanmış aksiyon yok.</p>";
+                
+                pKeys.forEach(key => {
+                    let item = past[key];
+                    let isC = item.title.includes("⚔️");
+                    let cl = isC ? "result-evet" : (item.result === "Evet" ? "result-evet" : "result-hayir");
+                    historyHTML += `
+                        <div class="history-item">
+                            <span style="max-width: 75%; line-height: 1.4;">${item.title}</span>
+                            <span class="result-badge ${cl}">[ ${(item.result || "").toUpperCase()} ]</span>
+                        </div>`;
+                });
+                document.getElementById("history-container").innerHTML = historyHTML;
+            });
+        }
+    </script>
+</body>
+</html>
