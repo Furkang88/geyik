@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEYK BORSASI v1.0</title>
+    <title>GEYIK BORSASI v1.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -103,7 +103,7 @@
             outline: none;
         }
 
-        /* KARAKTER SEÇM ALANI */
+        /* KARAKTER SECIM ALANI */
         .character-select-container {
             display: flex;
             justify-content: center;
@@ -136,7 +136,7 @@
 
         .char-avatar { font-size: 40px; margin-bottom: 15px; }
 
-        /* GR EKRANI */
+        /* GIRIS EKRANI */
         #login-screen { text-align: center; margin-top: 30px; }
 
         /* ANA OYUN ALANI */
@@ -146,7 +146,7 @@
         .left-side { flex: 2; min-width: 300px; }
         .right-side { flex: 1; min-width: 250px; }
 
-        /* GÜNLÜK ÇARK ALANI */
+        /* GUNLUK CARK ALANI */
         .wheel-box {
             background: #12121a;
             border: 4px dashed #ffb800;
@@ -163,7 +163,7 @@
             text-shadow: 2px 2px 0px #000;
         }
 
-        /* STATSTK BARLARI */
+        /* ISTATISTIK BARLARI */
         .stat-bar-container {
             background-color: #000;
             border: 2px solid #fff;
@@ -180,7 +180,7 @@
             text-shadow: 1px 1px 0px #000;
         }
 
-        /* BAHS KARTLARI VE CHALLENGE KARTLARI */
+        /* BAHIS KARTLARI VE CHALLENGE KARTLARI */
         .bet-card, .challenge-card {
             background: #252538;
             border: 4px solid #00ffcc;
@@ -230,7 +230,7 @@
 </head>
 <body>
 
-    <h1>=== GEYK BORSASI ===</h1>
+    <h1>=== GEYIK BORSASI ===</h1>
 
     <div id="login-screen" class="pixel-box">
         <p id="login-status-text" style="color: #ffb800; font-size: 12px; margin-bottom: 20px; letter-spacing: 2px;">YUKLENIYOR...</p>
@@ -430,7 +430,7 @@
             document.getElementById("main-game").style.display = "block";
             
             document.getElementById("current-user-avatar").innerText = selectedAvatarSymbol;
-            document.getElementById("current-user-display").innerText = currentUser.toUpperCase();
+            document.getElementById("current-user-display").innerText = currentUser;
 
             startLiveSync();
         }
@@ -588,7 +588,6 @@
             });
         }
 
-        // SONUÇLANDIRMA
         function resolveChallenge(id, winner) {
             playSound('levelup');
             db.ref("activeChallenges/" + id).once("value", snapshot => {
@@ -600,7 +599,7 @@
 
                 db.ref("pastBets").push({
                     title: `[KAPISMA] ${c.challenger} vs ${c.target} -> ${c.title}`,
-                    result: `KAZANAN: ${winner.toUpperCase()}`
+                    result: `KAZANAN: ${winner}`
                 });
                 db.ref("activeChallenges/" + id).remove();
             });
@@ -717,10 +716,10 @@
                     challHTML += `
                         <div class="challenge-card">
                             <div class="bet-header"><span style="color:#ffb800;"> KAPIMA HAVUZU: ${c.amount * 2} GC</span><span style="color:#00ffcc;">ONAYLANDI </span></div>
-                            <div class="bet-title"><b>${c.challenger.toUpperCase()}</b> vs <b>${c.target.toUpperCase()}</b><br>Iddia: <i>"${c.title}"</i></div>
+                            <div class="bet-title"><b>${c.challenger}</b> vs <b>${c.target}</b><br>Iddia: <i>"${c.title}"</i></div>
                             <div class="admin-actions" style="border-color: #ffb800;">
-                                <button class="pixel-btn" style="background:#ffb800; color:#000;" onclick="resolveChallenge('${c.id}', '${c.challenger}')">${c.challenger.toUpperCase()} KAZANDI</button>
-                                <button class="pixel-btn" style="background:#ffb800; color:#000;" onclick="resolveChallenge('${c.id}', '${c.target}')">${c.target.toUpperCase()} KAZANDI</button>
+                                <button class="pixel-btn" style="background:#ffb800; color:#000;" onclick="resolveChallenge('${c.id}', '${c.challenger}')">${c.challenger} KAZANDI</button>
+                                <button class="pixel-btn" style="background:#ffb800; color:#000;" onclick="resolveChallenge('${c.id}', '${c.target}')">${c.target} KAZANDI</button>
                             </div>
                         </div>`;
                 });
@@ -730,7 +729,7 @@
                     challHTML += `
                         <div class="challenge-card" style="border-color: #666; opacity: 0.7;">
                             <div class="bet-header"><span style="color:#aaa;">ISTEK: ${c.amount} GC</span><span style="color:#ffb800;">ONAY BEKLENIYOR </span></div>
-                            <div class="bet-title"><b>${c.challenger.toUpperCase()}</b> -> <b>${c.target.toUpperCase()}</b> kisisine kilic cekti.<br>Iddia: <i>"${c.title}"</i></div>
+                            <div class="bet-title"><b>${c.challenger}</b> -> <b>${c.target}</b> kisisine kilic cekti.<br>Iddia: <i>"${c.title}"</i></div>
                         </div>`;
                 });
                 document.getElementById("challenges-container").innerHTML = challHTML;
@@ -747,10 +746,10 @@
                 let crown = idx === 0 ? "<span class='crown'></span> " : `${idx + 1}. `;
                 lbHTML += `
                     <div class="leaderboard-item">
-                        <div class="leader-row"><span>${crown}${p.avatar} ${p.name.toUpperCase()}</span><span style="color:#ffb800;">${p.score} GC</span></div>
+                        <div class="leader-row"><span>${crown}${p.avatar} ${p.name}</span><span style="color:#ffb800;">${p.score} GC</span></div>
                         <div class="rank-badge">${getRank(p.score)}</div>
                     </div>`;
-                if(p.name !== currentUser) targetHTML += `<option value="${p.name}">${p.name.toUpperCase()}</option>`;
+                if(p.name !== currentUser) targetHTML += `<option value="${p.name}">${p.name}</option>`;
             });
             document.getElementById("leaderboard-container").innerHTML = lbHTML;
             document.getElementById("challenge-target").innerHTML = targetHTML;
@@ -767,7 +766,6 @@
                 
                 pKeys.forEach(key => {
                     let item = past[key];
-                    let isC = item.title.includes("[KAPISMA]");
                     let cl = "result-evet";
                     historyHTML += `
                         <div class="history-item">
