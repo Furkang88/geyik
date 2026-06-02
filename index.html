@@ -5,8 +5,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GEYIK BORSASI v1.0</title>
+    <!-- Atarici Fontu -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     
+    <!-- FIREBASE BAGLANTI KUTUPHANELERI -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
@@ -114,10 +116,10 @@
         .char-card {
             background-color: #000;
             border: 4px solid #fff;
-            padding: 20px;
+            padding: 30px 20px;
             cursor: pointer;
             text-align: center;
-            width: 160px;
+            width: 180px;
             box-shadow: 5px 5px 0px #ff0055;
         }
 
@@ -132,16 +134,6 @@
             border-color: #00ffcc;
             box-shadow: 5px 5px 0px #00ffcc;
             transform: scale(1.05);
-        }
-
-        /*  FONTUN EMOJILERI BOZMASINI ENGELLEYEN KRITIK AYAR */
-        .emoji-fix {
-            font-family: Arial, sans-serif !important;
-        }
-
-        .char-avatar { 
-            font-size: 40px; 
-            margin-bottom: 15px; 
         }
 
         /* GIRIS EKRANI */
@@ -240,56 +232,62 @@
 
     <h1>=== GEYIK BORSASI ===</h1>
 
+    <!-- 1. ADIM: KARAKTER SECIM GIRIS EKRANI -->
     <div id="login-screen" class="pixel-box">
         <p id="login-status-text" style="color: #ffb800; font-size: 12px; margin-bottom: 20px; letter-spacing: 2px;">YUKLENIYOR...</p>
         <div class="character-select-container">
             <div id="btn-furkan" class="char-card loading" onclick="selectProfile('Furkan')">
-                <div class="char-avatar emoji-fix"></div>
-                <div style="font-size: 12px; color: #00ffcc;">FURKAN</div>
+                <div style="font-size: 14px; color: #00ffcc; font-weight: bold;">FURKAN</div>
             </div>
             <div id="btn-kaan" class="char-card loading" onclick="selectProfile('Kaan')">
-                <div class="char-avatar"></div>
-                <div style="font-size: 12px; color: #ff0055;">KAAN</div>
+                <div style="font-size: 14px; color: #ff0055; font-weight: bold;">KAAN</div>
             </div>
         </div>
     </div>
 
+    <!-- 2. ADIM: ANA OYUN ALANI -->
     <div id="main-game">
+        <!-- Oyuncu Bilgisi -->
         <div style="text-align: center; margin-bottom: 20px; font-size: 11px;">
-            OYUNCU: <span id="current-user-avatar" class="emoji-fix">-</span> <span id="current-user-display" style="color:#00ffcc;">-</span> | 
+            OYUNCU: <span id="current-user-display" style="color:#00ffcc;">-</span> | 
             CUZDAN: <span id="current-score-display" style="color:#ffb800;">0</span> GC
         </div>
 
+        <!-- ANLIK MEYDAN OKUMA BLDRM ALANI -->
         <div id="challenge-alert-box" class="pixel-box" style="border-color: #ffb800; background: #2a1111; display: none;">
-            <p style="color: #ffb800; font-size: 11px; text-align: center;"> SANA MEYDAN OKUNDU! </p>
+            <p style="color: #ffb800; font-size: 11px; text-align: center;">MEYDAN OKUNDU!</p>
             <div id="challenge-alert-text" style="font-size: 10px; margin: 15px 0; line-height: 1.6; text-align: center;"></div>
             <div style="display: flex; flex-direction: column; gap: 8px;">
                 <div style="display: flex; gap: 10px;">
-                    <button class="pixel-btn" style="background:#00ffcc; color:#000; flex:1;" onclick="acceptChallenge()"> KABUL ET</button>
-                    <button class="pixel-btn" style="background:#ff0055; color:#fff; flex:1;" onclick="rejectChallenge()"> REDDET</button>
+                    <button class="pixel-btn" style="background:#00ffcc; color:#000; flex:1;" onclick="acceptChallenge()">KABUL ET</button>
+                    <button class="pixel-btn" style="background:#ff0055; color:#fff; flex:1;" onclick="rejectChallenge()">REDDET</button>
                 </div>
-                <button class="pixel-btn" style="background:#ffb800; color:#000; margin: 5px 0;" onclick="doubleChallenge()"> RISKI KATLA (2X)</button>
+                <button class="pixel-btn" style="background:#ffb800; color:#000; margin: 5px 0;" onclick="doubleChallenge()">RISKI KATLA (2X)</button>
             </div>
         </div>
 
         <div class="game-layout">
+            <!-- SOL TARAF MODÜLER -->
             <div class="left-side">
+                <!-- ANS ÇARKI MODÜLÜ -->
                 <div class="wheel-box">
                     <p style="font-size: 9px; color:#ffb800; margin:0;"> GUNLUK SANS CARKI</p>
                     <div id="wheel-display">== HAZIR ==</div>
                     <button id="wheel-btn" class="pixel-btn" style="background:#ffb800; color:#000; margin:0;" onclick="spinWheel()"> CARKI CEVIR</button>
                 </div>
 
+                <!-- MEYDAN OKUMA BALATMA -->
                 <div class="pixel-box" style="border-color: #ffb800;">
-                    <p style="color: #ffb800; font-size: 10px; margin-bottom: 15px;"> MEYDAN OKUMA BASLAT</p>
+                    <p style="color: #ffb800; font-size: 10px; margin-bottom: 15px;">MEYDAN OKUMA BASLAT</p>
                     <select id="challenge-target">
                         <option value="">KIME MEYDAN OKUYORSUN?</option>
                     </select>
                     <input type="text" id="challenge-text" placeholder="Meydan okuma iddiasi ne?">
                     <input type="number" id="challenge-amount" placeholder="Kac GC ortaya koyuyorsun?">
-                    <button class="pixel-btn" style="background-color: #ffb800; color:#000; width: 100%; margin: 0;" onclick="startChallenge()">KILICI CEK / MEYDAN OKU</button>
+                    <button class="pixel-btn" style="background-color: #ffb800; color:#000; width: 100%; margin: 0;" onclick="startChallenge()">MEYDAN OKU</button>
                 </div>
 
+                <!-- Admin Paneli -->
                 <div class="pixel-box" style="border-color: #ff0055;">
                     <p style="color: #ff0055; font-size: 10px; margin-bottom: 15px;"> ADMIN PANELI (BAHIS YAZMA ALANI)</p>
                     <input type="text" id="bet-text" placeholder="Iddia nedir?">
@@ -301,6 +299,7 @@
                     </select>
                     <button class="pixel-btn" style="background-color: #00ffcc; color:#000; width: 100%; margin-bottom: 20px;" onclick="createBet()">BAHSI ORTAYA AT</button>
                     
+                    <!--  SIFIRLAMA BUTONU -->
                     <p style="color: #ff0055; font-size: 8px; margin: 15px 0 5px 0; border-top: 2px dashed #ff0055; padding-top: 15px;"> TEHLIKELI BOLGE:</p>
                     <button class="pixel-btn" style="background-color: #000; color: #ff0055; border-color: #ff0055; width: 100%; margin: 0;" onclick="resetAllData()"> TUM VERILERI SIFIRLA</button>
                 </div>
@@ -308,10 +307,11 @@
                 <h2>AKTIF GENEL BAHISLER</h2>
                 <div id="bets-container"></div>
 
-                <h2> AKTIF MEYDAN OKUMALAR (KAPISMALAR)</h2>
+                <h2>AKTIF KAPIMALAR</h2>
                 <div id="challenges-container"></div>
             </div>
 
+            <!-- SA TARAF SKORLAR -->
             <div class="right-side">
                 <div class="pixel-box" style="border-color: #ffb800; margin-bottom: 20px;">
                     <p style="color: #ffb800; font-size: 10px; text-align: center; margin-bottom: 15px;"> HIGH SCORES</p>
@@ -319,12 +319,12 @@
                 </div>
 
                 <div class="pixel-box" style="border-color: #00ffcc;">
-                    <p style="color: #00ffcc; font-size: 10px; text-align: center; margin-bottom: 15px;"> KAPISMA GALIBIYETLERI</p>
+                    <p style="color: #00ffcc; font-size: 10px; text-align: center; margin-bottom: 15px;"> KAPISMA GALIBIYETERI</p>
                     <div style="font-size: 10px; padding: 5px 0; border-bottom: 1px dashed #333; display: flex; justify-content: space-between;">
-                        <span> FURKAN:</span> <span id="stat-wins-furkan" style="color: #00ffcc;">0</span>
+                        <span>FURKAN:</span> <span id="stat-wins-furkan" style="color: #00ffcc;">0</span>
                     </div>
                     <div style="font-size: 10px; padding: 5px 0; display: flex; justify-content: space-between;">
-                        <span> KAAN:</span> <span id="stat-wins-kaan" style="color: #ff0055;">0</span>
+                        <span>KAAN:</span> <span id="stat-wins-kaan" style="color: #ff0055;">0</span>
                     </div>
                 </div>
             </div>
@@ -390,7 +390,6 @@
 
         // --- DEKENLER ---
         let currentUser = "";
-        let selectedAvatarSymbol = ""; 
         let players = {};
         let activeIncomingChallengeId = null;
         let isFirebaseLoaded = false; 
@@ -427,18 +426,15 @@
             if (!players[currentUser]) {
                 db.ref("players/" + currentUser).set({
                     score: 100,
-                    avatar: currentUser === "Furkan" ? "" : "",
                     challengeWins: 0,
                     lastWheelDate: ""
                 });
             }
 
-            selectedAvatarSymbol = currentUser === "Furkan" ? "" : "";
             document.getElementById("login-screen").style.display = "none";
             document.getElementById("main-game").style.display = "block";
             
-            document.getElementById("current-user-avatar").innerText = selectedAvatarSymbol;
-            document.getElementById("current-user-display").innerText = currentUser;
+            document.getElementById("current-user-display").innerText = currentUser.toUpperCase();
 
             startLiveSync();
         }
@@ -453,7 +449,7 @@
                 if (incoming && activeIncomingChallengeId !== incoming) {
                     activeIncomingChallengeId = incoming;
                     let c = chs[incoming];
-                    document.getElementById("challenge-alert-text").innerHTML = `<b>${c.challenger}</b> sana <b>${c.amount} GC</b> degerinde meydan okudu!<br>Iddia: <i>"${c.title}"</i>`;
+                    document.getElementById("challenge-alert-text").innerHTML = `<b>${c.challenger.toUpperCase()}</b> sana <b>${c.amount} GC</b> degerinde meydan okudu!<br>Iddia: <i>"${c.title}"</i>`;
                     document.getElementById("challenge-alert-box").style.display = "block";
                     playSound('coin');
                 } else if (!incoming) {
@@ -606,8 +602,8 @@
                 });
 
                 db.ref("pastBets").push({
-                    title: `[KAPISMA] ${c.challenger} vs ${c.target} -> ${c.title}`,
-                    result: `KAZANAN: ${winner}`
+                    title: `[KAPISMA] ${c.challenger.toUpperCase()} vs ${c.target.toUpperCase()} -> ${c.title}`,
+                    result: `KAZANAN: ${winner.toUpperCase()}`
                 });
                 db.ref("activeChallenges/" + id).remove();
             });
@@ -723,11 +719,11 @@
                     let c = chs[key];
                     challHTML += `
                         <div class="challenge-card">
-                            <div class="bet-header"><span style="color:#ffb800;"> KAPIMA HAVUZU: ${c.amount * 2} GC</span><span style="color:#00ffcc;">ONAYLANDI </span></div>
-                            <div class="bet-title"><b>${c.challenger}</b> vs <b>${c.target}</b><br>Iddia: <i>"${c.title}"</i></div>
+                            <div class="bet-header"><span style="color:#ffb800;"> HAVUZ: ${c.amount * 2} GC</span><span style="color:#00ffcc;">ONAYLANDI </span></div>
+                            <div class="bet-title"><b>${c.challenger.toUpperCase()}</b> vs <b>${c.target.toUpperCase()}</b><br>Iddia: <i>"${c.title}"</i></div>
                             <div class="admin-actions" style="border-color: #ffb800;">
-                                <button class="pixel-btn" style="background:#ffb800; color:#000;" onclick="resolveChallenge('${c.id}', '${c.challenger}')">${c.challenger} KAZANDI</button>
-                                <button class="pixel-btn" style="background:#ffb800; color:#000;" onclick="resolveChallenge('${c.id}', '${c.target}')">${c.target} KAZANDI</button>
+                                <button class="pixel-btn" style="background:#ffb800; color:#000;" onclick="resolveChallenge('${c.id}', '${c.challenger}')">${c.challenger.toUpperCase()} KAZANDI</button>
+                                <button class="pixel-btn" style="background:#ffb800; color:#000;" onclick="resolveChallenge('${c.id}', '${c.target}')">${c.target.toUpperCase()} KAZANDI</button>
                             </div>
                         </div>`;
                 });
@@ -737,28 +733,27 @@
                     challHTML += `
                         <div class="challenge-card" style="border-color: #666; opacity: 0.7;">
                             <div class="bet-header"><span style="color:#aaa;">ISTEK: ${c.amount} GC</span><span style="color:#ffb800;">ONAY BEKLENIYOR </span></div>
-                            <div class="bet-title"><b>${c.challenger}</b> -> <b>${c.target}</b> kisisine kilic cekti.<br>Iddia: <i>"${c.title}"</i></div>
+                            <div class="bet-title"><b>${c.challenger.toUpperCase()}</b> -> <b>${c.target.toUpperCase()}</b> kisisine meydan okudu.<br>Iddia: <i>"${c.title}"</i></div>
                         </div>`;
                 });
                 document.getElementById("challenges-container").innerHTML = challHTML;
             });
 
             let sorted = Object.keys(players).map(name => {
-                return { name: name, score: players[name].score || 0, avatar: players[name].avatar || "" };
+                return { name: name, score: players[name].score || 0 };
             }).sort((a,b) => b.score - a.score);
 
             let lbHTML = "";
             let targetHTML = "<option value=''>KIME MEYDAN OKUYORSUN?</option>";
 
             sorted.forEach((p, idx) => {
-                let crown = idx === 0 ? "<span class='crown'></span> " : `${idx + 1}. `;
-                // Skor tablosundaki emojiler de korumaya alnd
+                let crown = idx === 0 ? " " : `${idx + 1}. `;
                 lbHTML += `
                     <div class="leaderboard-item">
-                        <div class="leader-row"><span>${crown}<span class="emoji-fix">${p.avatar}</span> ${p.name}</span><span style="color:#ffb800;">${p.score} GC</span></div>
+                        <div class="leader-row"><span>${crown}${p.name.toUpperCase()}</span><span style="color:#ffb800;">${p.score} GC</span></div>
                         <div class="rank-badge">${getRank(p.score)}</div>
                     </div>`;
-                if(p.name !== currentUser) targetHTML += `<option value="${p.name}">${p.name}</option>`;
+                if(p.name !== currentUser) targetHTML += `<option value="${p.name}">${p.name.toUpperCase()}</option>`;
             });
             document.getElementById("leaderboard-container").innerHTML = lbHTML;
             document.getElementById("challenge-target").innerHTML = targetHTML;
