@@ -134,7 +134,15 @@
             transform: scale(1.05);
         }
 
-        .char-avatar { font-size: 40px; margin-bottom: 15px; }
+        /*  FONTUN EMOJILERI BOZMASINI ENGELLEYEN KRITIK AYAR */
+        .emoji-fix {
+            font-family: Arial, sans-serif !important;
+        }
+
+        .char-avatar { 
+            font-size: 40px; 
+            margin-bottom: 15px; 
+        }
 
         /* GIRIS EKRANI */
         #login-screen { text-align: center; margin-top: 30px; }
@@ -236,7 +244,7 @@
         <p id="login-status-text" style="color: #ffb800; font-size: 12px; margin-bottom: 20px; letter-spacing: 2px;">YUKLENIYOR...</p>
         <div class="character-select-container">
             <div id="btn-furkan" class="char-card loading" onclick="selectProfile('Furkan')">
-                <div class="char-avatar"></div>
+                <div class="char-avatar emoji-fix"></div>
                 <div style="font-size: 12px; color: #00ffcc;">FURKAN</div>
             </div>
             <div id="btn-kaan" class="char-card loading" onclick="selectProfile('Kaan')">
@@ -248,7 +256,7 @@
 
     <div id="main-game">
         <div style="text-align: center; margin-bottom: 20px; font-size: 11px;">
-            OYUNCU: <span id="current-user-avatar">-</span> <span id="current-user-display" style="color:#00ffcc;">-</span> | 
+            OYUNCU: <span id="current-user-avatar" class="emoji-fix">-</span> <span id="current-user-display" style="color:#00ffcc;">-</span> | 
             CUZDAN: <span id="current-score-display" style="color:#ffb800;">0</span> GC
         </div>
 
@@ -744,9 +752,10 @@
 
             sorted.forEach((p, idx) => {
                 let crown = idx === 0 ? "<span class='crown'></span> " : `${idx + 1}. `;
+                // Skor tablosundaki emojiler de korumaya alnd
                 lbHTML += `
                     <div class="leaderboard-item">
-                        <div class="leader-row"><span>${crown}${p.avatar} ${p.name}</span><span style="color:#ffb800;">${p.score} GC</span></div>
+                        <div class="leader-row"><span>${crown}<span class="emoji-fix">${p.avatar}</span> ${p.name}</span><span style="color:#ffb800;">${p.score} GC</span></div>
                         <div class="rank-badge">${getRank(p.score)}</div>
                     </div>`;
                 if(p.name !== currentUser) targetHTML += `<option value="${p.name}">${p.name}</option>`;
